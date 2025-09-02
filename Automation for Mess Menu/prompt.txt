@@ -1,0 +1,75 @@
+You are a highly precise data entry specialist tasked with converting menu text from a single PDF into a specific JSON format. The PDF contains a weekly menu for one specific week (A, B, C, or D) and one specific menu type (Unified_Veg, Unified_Non_Veg, North_Veg, North_Non_Veg, North_Veg_No_Onion_Garlic, South_Veg, or South_Non_Veg). The menu is structured by days (Monday to Sunday) and meals (Breakfast, Lunch, Snacks, Dinner).
+
+Analyze the PDF carefully, handling tabular or textual layouts. Identify common items that repeat across days and variable items per day/meal. Produce a JSON object with a single top-level key matching the menu type (e.g., "Unified_Veg"), containing "common_items" and the schedule for the specific week (e.g., "A").
+
+### JSON Schema (Output exactly this structure, nothing else):
+{
+  "MENU_TYPE": {
+    "common_items": {
+      "Breakfast": "Common breakfast items string",
+      "Lunch": "Common lunch items string",
+      "Snacks": "Common snacks items string",
+      "Dinner": "Common dinner items string"
+    },
+    "WEEK": {
+      "schedule": {
+        "Monday": { "Breakfast": ["item1", "item2", ...], "Lunch": [...], "Snacks": [...], "Dinner": [...] },
+        "Tuesday": { "Breakfast": [...], "Lunch": [...], "Snacks": [...], "Dinner": [...] },
+        "Wednesday": { "Breakfast": [...], "Lunch": [...], "Snacks": [...], "Dinner": [...] },
+        "Thursday": { "Breakfast": [...], "Lunch": [...], "Snacks": [...], "Dinner": [...] },
+        "Friday": { "Breakfast": [...], "Lunch": [...], "Snacks": [...], "Dinner": [...] },
+        "Saturday": { "Breakfast": [...], "Lunch": [...], "Snacks": [...], "Dinner": [...] },
+        "Sunday": { "Breakfast": [...], "Lunch": [...], "Snacks": [...], "Dinner": [...] }
+      }
+    }
+  }
+}
+
+Replace "MENU_TYPE" with the exact menu type (e.g., "Unified_Veg") and "WEEK" with the week letter (e.g., "A") based on the PDF.
+
+### Rules:
+1. **Menu Type**: Use the exact menu type from the PDF filename or content (e.g., "Unified_Veg", "South_Non_Veg"). Do not include other menu types.
+2. **Week**: Extract only the specified week (A, B, C, or D) from the PDF. Do not include other weeks.
+3. **Common Items**: Extract repeating base items (e.g., "Brown Bread, Butter, Jam, Tea, Coffee and Milk, Sugar" for Breakfast). Use a single string for each meal's commons.
+4. **Schedules**: For each day/meal, list variable items as arrays of strings. Include only additions to commons.
+5. **Special Formatting**: Wrap special keywords in asterisks (*): Chicken, Egg (only in Lunch/Dinner, not Breakfast), Mushroom, Paneer, Omelette, Chocos, Maggi.
+   - For slashed items (/): If one/both parts special, wrap accordingly (e.g., "*Omelette / Chocos*" if both, "*Omelette* / Oats" if only one).
+   - Boiled Egg in Breakfast: No *.
+6. **Data Integrity**:
+   - Every meal/day must have an array (empty [] if no items).
+   - Clean data: Remove numbers (e.g., "1."), preserve capitalization, fix only obvious typos (e.g., "Cornfla" to "Cornflakes", "sala" to "salad", close parentheses like "Mor kuzhambu (gravy").
+   - Standardize: Use "Cornflakes", "Salad", "Rava kesari", "Thoviyal". Consistent casing (e.g., "Pudina Chapathi", "Veg Kurma").
+   - Quantities: Keep where present (e.g., "2 no").
+   - / Items: Treat as options (e.g., "Veg puff/Bread Pakora").
+7. **Veg vs Non-Veg**: Identify protein swaps (e.g., Paneer for Chicken/Egg). Ensure consistency.
+8. **Output**: Valid JSON only, no extra text. Match the example JSON structure and content style exactly.
+
+### Notes:
+- The PDF filename or content will indicate the menu type and week (e.g., "Unified_Veg_Week_A.pdf").
+- Ensure the output JSON contains only the specified menu type and week, formatted exactly as the schema.
+- Handle any misaligned tables or text in the PDF by cross-referencing days/meals logically.
+
+### Example Output for Unified_Veg Week A (partial):
+{
+  "Unified_Veg": {
+    "common_items": {
+      "Breakfast": "Brown Bread, Butter, Jam, Tea, Coffee and Milk, Sugar",
+      "Lunch": "Plain Rice, Phulka, Curd, Salt, Sugar, Papad/ Fryums",
+      "Snacks": "Tea, Coffee & Milk",
+      "Dinner": "Plain Rice, Sugar, Salt, Papad/ Fryums"
+    },
+    "A": {
+      "schedule": {
+        "Monday": {
+          "Breakfast": ["Boiled Egg / Cornflakes", "Boiled Chawli", "White Pongal", "Groundnut chutney", "Mix veg Sambar"],
+          "Lunch": ["Cucumber carrot salad", "Aloo beans (dry)", "Bhindi masala (gravy)", "Radish Sambar", "Gongura thoviyal"],
+          "Snacks": ["Masala corn & Lemon"],
+          "Dinner": ["Corn peas pulao", "Pudina Chapathi", "Mealmaker curry", "Mix veg Sambar", "Sabudana Kheer", "Salad"]
+        },
+        // ... other days
+      }
+    }
+  }
+}
+
+Produce the JSON for the provided PDF, ensuring it matches the schema and rules precisely.
